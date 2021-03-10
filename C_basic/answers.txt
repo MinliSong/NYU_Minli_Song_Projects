@@ -1,0 +1,46 @@
+Name:    Minli Song
+net ID:       ms12231
+NYU ID(N#):   N19264696
+
+Collaborators (who you talked to about the lab, what you talked about):No
+
+
+Source material that you consulted:No
+
+
+Other acknowledgments:No
+
+
+-------------------------------------------------------------------------------
+
+Answer to Exercise 6:add ";" at line 56 for linked_list.c
+
+
+Answer to Exercise 7:add when size equal 0 case for list_zise() function 
+I added 
+
+if(p == NULL){       at line 12, 13,14 of linked_list.c
+return 0;
+}
+
+
+Answer to Exercise 8:
+It opens blkdev.h in include/linux/blkdev.h line 1676
+
+Answer to Exercise 9:
+futex_pi_state is a Priority Inheritance state: It is defined in line 188 at “Kernel/futex.c” file 
+
+Answer to Exercise 10:
+There are 3 functions 
+1.	proc_shed_autogroup_show_task in kernel/sched/autogroup.c
+2.	proc_shed_set_task in kernel/sched/debug.c
+3.	proc_shed_show_task in kernel/sched/debug.c
+
+
+Answer to Exercise 11:
+996154
+
+
+Anything else you'd like us to know:
+
+

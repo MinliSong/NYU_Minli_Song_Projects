@@ -1,0 +1,38 @@
+Name: 
+net ID: 
+NYU ID(N#): 
+
+Collaborators (who you talked to about the lab, what you talked about):
+
+
+Source material that you consulted:
+
+
+Other acknowledgments:
+
+
+-------------------------------------------------------------------------------
+
+Answers to exercises G1--G3:
+G1:
+This command search all files contains "smutex" in current directory recursively.
+Binary file ./build/sthread.o matches
+Binary file ./build/estoresim matches
+./sthread.h:typedef pthread_mutex_t smutex_t;
+./sthread.h:void smutex_init(smutex_t *mutex);
+
+G2: grep "Task" RequestGenerator.cpp         
+
+grep -r "return" --include=\*.h ./     
+
+G3:
+This return functions begin with "smutex" .
+It will give us where I have init, destroy, lock and unlock the smutes. 
+
+
+------------------------------------------------------------------------------
+
+Anything else you'd like us to know:
+
+
+Extra credit exercise(s) (describe what you coded):
