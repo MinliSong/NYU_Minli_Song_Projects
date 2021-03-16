@@ -22,7 +22,7 @@ TaskQueue()
 TaskQueue::
 ~TaskQueue()
 {
-    while(front!=NULL){
+    while(front!=NULL){ // delelte the nodes 
 	Node* temp = front;
 	front = front->next;
 	delete temp;
@@ -86,18 +86,18 @@ void TaskQueue::
 enqueue(Task task)
 {	 
     smutex_lock(&mutex);
-    Node* temp = new Node;
-    if(temp == NULL){
+    Node* temp = new Node; 
+    if(temp == NULL){ 
 	cout<<"overflow";
 	return;
     }
-    temp->task = task;
+    temp->task = task; 
     temp->next = NULL;
     assert(temp!=NULL);
-    if(front == NULL){
+    if(front == NULL){ //the input is the first task 
         front = rear = temp;
     }
-    else{
+    else{ //at least one task already in queue
 	rear->next = temp;
 	rear = temp;
     }
@@ -123,30 +123,25 @@ Task TaskQueue::
 dequeue()
 {    
     smutex_lock(&mutex);
-    //cout<<"Dequeue"<<qsize <<endl;
     
-    while(qsize==0){
+    while(qsize==0){ //wait until task avalible
 	scond_wait(&nonEmpty,&mutex);
     }
- 
-
     qsize --;
-    //cout<<"Task handler is "<<reinterpret_cast<BuyItemReq*>(front->task.arg)->item_id;
   
     assert(front!=NULL);
     assert(rear!=NULL);
     Task t = front->task;
 
-    if(front == rear){
+    if(front == rear){ // only one task in queue 
 	front = rear = NULL;
     }
-    else{
+    else{ //many tasks in queue
         Node *temp = front;
 	front = front->next;
 	free(temp);
     }
     smutex_unlock(&mutex);
-    //cout <<"Task is out"<<endl;
     return t;
 }
 

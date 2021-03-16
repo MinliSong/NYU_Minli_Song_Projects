@@ -4,6 +4,9 @@
 #include "sthread.h"
 #include "Request.h"
 
+static smutex_t printfMutex;
+
+
 /* 
  * ------------------------------------------------------------------
  * Item -- 
@@ -75,11 +78,9 @@ class EStore {
     smutex_t mutex;
     scond_t nonEmpty;
     scond_t enoughBudget;
-    smutex_t itemsMutex[INVENTORY_SIZE];
 
     public:
-
-    explicit EStore(bool enableFineMode);
+      explicit EStore(bool enableFineMode);
     ~EStore();
 
     void buyItem(int item_id, double budget);

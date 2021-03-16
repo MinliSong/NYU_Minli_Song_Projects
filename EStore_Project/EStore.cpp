@@ -1,9 +1,9 @@
 #include <cassert>
-
 #include "EStore.h"
 #include <iostream>
 using namespace std;
-
+#define ANSI_COLOR_RED    "\x1b[31m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
 
 Item::
 Item() : valid(false)
@@ -25,8 +25,9 @@ EStore(bool enableFineMode)
     : fineMode(enableFineMode)
 {   
     smutex_init(&mutex);
-    scond_init(&nonEmpty);
-    scond_init(&enoughBudget);
+    smutex_init(&printfMutex);//mutex to protect printf
+    scond_init(&nonEmpty); //mutex for item quantity smaller than 0
+    scond_init(&enoughBudget);// mutex for budget is not enough
 
     shippingCost =3;
     storeDiscount = 0;
@@ -36,6 +37,7 @@ EStore::
 ~EStore()
 {
    smutex_destroy(&mutex);
+   smutex_destroy(&printfMutex);
    scond_destroy(&nonEmpty);
    scond_destroy(&enoughBudget);
 }
@@ -89,9 +91,9 @@ buyItem(int item_id, double budget)
     }
     else{
        double cost = item->price*(1-item->discount)*(1-storeDiscount);
-       while((item->quantity == 0) ||(budget < cost)){
+       while((item->quantity <= 0) ||(budget < cost)){
           scond_wait(&nonEmpty,&mutex);
-	 // scond_wait(&enoughBudget,&mutex);
+	  scond_wait(&enoughBudget,&mutex);
 
        }
 
@@ -99,7 +101,7 @@ buyItem(int item_id, double budget)
        budget = budget - cost;
 
     }
-    //cout<<"buy an item success"<<endl;
+   // printf(ANSI_COLOR_RED "Buy item success !!!!!!! %d \n" ANSI_COLOR_RESET, item_id); // Print out functionto check if the function works! This is in red! 
     smutex_unlock(&mutex);
     return;
 
@@ -153,51 +155,56 @@ buyItem(int item_id, double budget)
 void EStore::
 buyManyItems(vector<int>* item_ids, double budget)
 {
-//    assert(fineModeEnabled());
-//    smutex_lock(&mutex);
-//    int i; 
-//    Item items[item_ids->size()];
-//    double itemsCost;
-//    const double storeDis = storeDiscount;
-//    const double shippingC = shippingCost;
-//    for(i = 0; i < (int)item_ids->size(); i++){
-//	if((*item_ids)[i] > (int)sizeof(inventory - 1)){
-//	    cout<<"Inventory overflow"<<endl;
-//	}
-//
-//	items[i] = inventory[(*item_ids)[i]];
-//	if(items[i].valid == false){
-//	    cout<<"Item is unvalid now"<<endl;
-//	    smutex_unlock(&mutex);
-//	    return;
-//	}
-//	itemsCost = itemsCost + items[i].price*(1-items[i].discount);
-//    }
-//
-//    for(i =0; i < (int)sizeof(items); i++){
-//	while( (items[i].quantity == 0) || ((itemsCost*(1-storeDis) + shippingC)) > budget){ 
-// 	    scond_wait(&nonEmpty, &mutex);
-//	    scond_wait(&enoughBudget, &mutex);
-//	    itemsCost = 0;
-//	    for(int n =0; n <(int)sizeof(items); n++){
-//		itemsCost = itemsCost + items[i].price*(1-items[i].discount);
-//	    }
-//	}
-//        
-//
-//    }
-//
-//    for(i = 0; i <(int)sizeof(items); i++){
-//	items[i].quantity --;
-//    }
-//
-//    budget = budget - itemsCost*(1 - storeDis) + shippingC;
-//
-//
-//
-//
-//
-//    smutex_unlock(&mutex);
+    assert(fineModeEnabled());
+    vector<int> &items = *item_ids;
+    double itemsCost = 0;
+   // const double storeDis = storeDiscount; //extra credit
+   // const double shippingC = shippingCost; //extra credit 
+
+    for(unsigned i = 0; i < items.size(); i++){// loop to check item valid or not and calculat the cost 
+
+	smutex_lock(&inventory[items.at(i)].itemMutex);
+
+	if(inventory[items.at(i)].valid == false){
+	 
+	  //  printf("Item is unvalid now \n");
+	    smutex_unlock(&inventory[items.at(i)].itemMutex);
+	
+	    return;
+	}
+        
+	itemsCost = itemsCost + inventory[items.at(i)].price*(1-inventory[items.at(i)].discount);
+	smutex_unlock(&inventory[items.at(i)].itemMutex);
+    }
+ 
+
+    for(unsigned i =0; i < items.size(); i++){ //chech for each item stock
+	smutex_lock(&inventory[items.at(i)].itemMutex);
+     
+//	while( (inventory[items.at(i)].quantity <= 0) || ((itemsCost*(1-storeDiscount) + shippingCost)) > budget){ 
+ //	    scond_wait(&inventory[items.at(i)].itemNonEmpty, &inventory[items.at(i)].itemMutex);
+//	} // extra credit 
+        if((inventory[items.at(i)].quantity <= 0) || ((itemsCost*(1-storeDiscount) + shippingCost)) > budget){
+	 smutex_unlock(&inventory[items.at(i)].itemMutex);
+	 return;
+	}
+        smutex_unlock(&inventory[items.at(i)].itemMutex);
+    }
+    
+
+    for(unsigned i = 0; i < items.size(); i++){ //decrease each item's quantity by 1
+        smutex_lock(&inventory[items.at(i)].itemMutex);
+
+	inventory[items.at(i)].quantity --;
+
+	smutex_unlock(&inventory[items.at(i)].itemMutex);
+    }
+      
+    budget = budget - itemsCost*(1 - storeDiscount) + shippingCost;
+    //smutex_lock(&printfMutex);
+   // printf(ANSI_COLOR_RED "Buy many items success !!!!!!! with size of list: %d \n" ANSI_COLOR_RESET, (int)items.size()); // Print out functionto check if the function works! This is in red! 
+    //smutex_unlock(&printfMutex);
+
     return;
     
 }
@@ -222,8 +229,6 @@ addItem(int item_id, int quantity, double price, double discount)
     smutex_lock(&mutex); //normal mode
  
     Item *item = &inventory[item_id];
-
-   // smutex_lock(&item->itemMutex);
 
     if(item->valid == true){
        	smutex_unlock(&mutex); // normal mode
@@ -275,12 +280,15 @@ removeItem(int item_id)
     smutex_lock(&item->itemMutex);//fine mode
 
     item->valid = false;
+    scond_broadcast(&item->itemNonEmpty, &item->itemMutex); // fine mode
 
     smutex_unlock(&item->itemMutex);//fine mode
 
 
     scond_broadcast(&nonEmpty,&mutex);
     scond_broadcast(&enoughBudget, &mutex);
+   // scond_broadcast(&item->itemNonEmpty, &item->itemMutex); // fine mode
+
 
     smutex_unlock(&mutex);
  
@@ -314,11 +322,15 @@ addStock(int item_id, int count)
     smutex_lock(&item->itemMutex); //fine mode
 
     item->quantity = item->quantity + count;
+    scond_broadcast(&item->itemNonEmpty, &item->itemMutex); // fine mode
+
 
     smutex_unlock(&item->itemMutex);//fine mode
 
     scond_broadcast(&nonEmpty,&mutex);
     scond_broadcast(&enoughBudget, &mutex);
+   // scond_broadcast(&item->itemNonEmpty, &item->itemMutex); // fine mode
+
 
     smutex_unlock(&mutex);
     return;
@@ -355,6 +367,7 @@ priceItem(int item_id, double price)
     item->price = price;
     scond_broadcast(&nonEmpty,&mutex);
     scond_broadcast(&enoughBudget, &mutex);
+    scond_broadcast(&item->itemNonEmpty, &item->itemMutex); // fine mode
 
     smutex_unlock(&item->itemMutex);//fine mode
 
@@ -399,6 +412,7 @@ discountItem(int item_id, double discount)
     item->discount = discount;
     scond_broadcast(&nonEmpty,&mutex);
     scond_broadcast(&enoughBudget, &mutex);
+    scond_broadcast(&item->itemNonEmpty, &item->itemMutex); // fine mode
 
     smutex_unlock(&item->itemMutex); //fine mode
 

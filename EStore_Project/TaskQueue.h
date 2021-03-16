@@ -10,7 +10,7 @@ struct Task {
     void* arg;
 };
 
-struct Node{
+struct Node{ //node for the task queue inplement by linked list
     Task task;
     Node* next;
 };
@@ -27,7 +27,7 @@ struct Node{
 class TaskQueue {
     private:
     smutex_t mutex;
-    int qsize;
+    int qsize;//trace the size of the queue
     Node* front;
     Node* rear;
     scond_t nonEmpty;

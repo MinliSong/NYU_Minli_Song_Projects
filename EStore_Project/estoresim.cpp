@@ -24,10 +24,6 @@ class Simulation
     explicit Simulation(bool useFineMode) : store(useFineMode) { }
 };
 
-struct thread_data {
-    int  thread_id;
-    char *message;
-};
 /*
  * ------------------------------------------------------------------
  * supplierGenerator --
@@ -123,7 +119,7 @@ supplier(void* arg)
     Simulation* sim = reinterpret_cast<Simulation*>(arg);
     Task task;
 
-    while(1){
+    while(1){//keep solving supplier tasks until stop handler envoke
         task = sim->supplierTasks.dequeue();
         task.handler(task.arg);
     }
@@ -152,7 +148,7 @@ customer(void* arg)
     Simulation* sim = reinterpret_cast<Simulation*>(arg);
     Task task;
 
-    while(1){
+    while(1){ //keep solving customer task until stop handler envoke
         task = sim->customerTasks.dequeue();
         task.handler(task.arg);   
     }
@@ -187,29 +183,29 @@ customer(void* arg)
 static void
 startSimulation(int numSuppliers, int numCustomers, int maxTasks, bool useFineMode)
 {
-    Simulation* sim = new Simulation(useFineMode);
+    Simulation* sim = new Simulation(useFineMode);//initial simulation 
     sim->numSuppliers = numSuppliers;
     sim->numCustomers = numCustomers;
     sim->maxTasks = maxTasks;
     sim->supplierTasks = TaskQueue();
     sim->customerTasks = TaskQueue();
 
-    sthread_t supplierGeneratorThrd;
-    sthread_t customerGeneratorThrd;
+    sthread_t supplierGeneratorThrd;//create supplier generator thread
+    sthread_t customerGeneratorThrd;//create customer generator thread
     sthread_create(&supplierGeneratorThrd,supplierGenerator,(void *)sim);//supplier generator thread
 
     sthread_create(&customerGeneratorThrd,customerGenerator,(void *)sim);//customer generator thread
    
     int i;
     int n;
-    sthread_t supplierThrd[numSuppliers];//supplier threads
+    sthread_t supplierThrd[numSuppliers];//crrete numSuppliers supplier threads
     for(i = 0; i < numSuppliers; i++){
 	sthread_create(&supplierThrd[i],supplier,(void *)sim); 
 
     }
     
 
-    sthread_t customerThrd[numCustomers];//customer threads
+    sthread_t customerThrd[numCustomers];//create numCustomer customer threads
     for(i = 0; i < numCustomers; i++){
        sthread_create(&customerThrd[i],customer,(void *)sim);
     }
@@ -233,7 +229,6 @@ startSimulation(int numSuppliers, int numCustomers, int maxTasks, bool useFineMo
 int main(int argc, char **argv)
 {
     bool useFineMode = false;
-
     // Seed the random number generator.
     // You can remove this line or set it to some constant to get deterministic
     // results, but make sure you put it back before turning in.
@@ -242,6 +237,7 @@ int main(int argc, char **argv)
     if (argc > 1)
         useFineMode = strcmp(argv[1], "--fine") == 0;
     startSimulation(10, 10, 100, useFineMode);
+
     return 0;
 }
 

@@ -57,7 +57,6 @@ enqueueTasks(int maxTasks, EStore* store)
     {
         taskQueue->enqueue(generateTask(store));
         taskCount++;
-
 //	cout << "task " << taskCount << "enqueue successfully " << taskQueue->size() << endl;
         sthread_sleep(0, 100000000);
     }
@@ -196,7 +195,6 @@ generateTask(EStore* store)
             break;
         }
     } // !switch
-    //cout<<"Task handler is "<< task.handler;
     return task;
 }
 

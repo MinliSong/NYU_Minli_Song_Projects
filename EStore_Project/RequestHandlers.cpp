@@ -2,6 +2,8 @@
 #include "sthread.h"
 #include "Request.h"
 #include "EStore.h"
+
+
 using namespace std;
 /*
  * ------------------------------------------------------------------
@@ -20,8 +22,9 @@ void
 add_item_handler(void *args)
 {
     AddItemReq* req =  reinterpret_cast<AddItemReq*> (args);
-   // cout<<"Handling AddItemReq: item_id - "<< req->item_id << " quantiy -  " << req->quantity << " price - " << req->price << " discount - " <<req->discount << endl;
+    smutex_lock(&printfMutex);
     printf("Handling AddItemReq: item_id - %d quantiy -  %d  price - %f  discount - %f \n",req->item_id, req->quantity, req->price, req->discount);
+    smutex_unlock(&printfMutex);
     req->store->addItem(req->item_id, req->quantity, req->price, req->discount);
 
     return;
@@ -44,8 +47,9 @@ void
 remove_item_handler(void *args)
 {
     RemoveItemReq* req = reinterpret_cast<RemoveItemReq*> (args);
-   // cout<<"Handling RemoveItemReq: item_id - "<<req->item_id <<endl;
+    smutex_lock(&printfMutex);
     printf("Handling RemoveItemReq: item_id - %d \n",req->item_id);
+    smutex_unlock(&printfMutex);
     req->store->removeItem(req->item_id);
     return;
 }
@@ -67,8 +71,9 @@ void
 add_stock_handler(void *args)
 {
     AddStockReq* req = reinterpret_cast<AddStockReq*> (args);
-    //cout<<"Handling AddStockReq: item_id - "<<req->item_id << ", additional_stock -"<< req->additional_stock <<endl;
+    smutex_lock(&printfMutex);
     printf("Handling AddStockReq: item_id - %d, additional_stock - %d \n", req->item_id, req->additional_stock);
+    smutex_unlock(&printfMutex);
     req->store->addStock(req->item_id,req->additional_stock);
     return;
 }
@@ -90,8 +95,9 @@ void
 change_item_price_handler(void *args)
 {
     ChangeItemPriceReq* req = reinterpret_cast<ChangeItemPriceReq*> (args);
-//  cout<<"Handling ChangeItemPriceReq: item_id - "<<req->item_id << ", new_price -"<< req->new_price <<endl;
+    smutex_lock(&printfMutex);
     printf("Handling ChangeItemPriceReq: item_id - %d new_price - %f \n", req->item_id, req->new_price);
+    smutex_unlock(&printfMutex);
     req->store->priceItem(req->item_id,req->new_price);
     return;
 
@@ -114,8 +120,9 @@ void
 change_item_discount_handler(void *args)
 {
     ChangeItemDiscountReq* req = reinterpret_cast<ChangeItemDiscountReq*> (args);
-   // cout<<"Handling ChangeItemDiscountReq: item_id - "<<req->item_id << ", new_discount -"<< req->new_discount <<endl;
+    smutex_lock(&printfMutex);
     printf("Handling ChangeItemDiscountReq: item_id - %d , new_discount - %f \n", req->item_id, req->new_discount);
+    smutex_unlock(&printfMutex);
     req->store->discountItem(req->item_id,req->new_discount);
     return;
 
@@ -138,8 +145,9 @@ void
 set_shipping_cost_handler(void *args)
 {
     SetShippingCostReq* req = reinterpret_cast<SetShippingCostReq*> (args);
-//  cout<<"Handling SetShippingCostReq: new_cost - "<<req->new_cost << endl;
+    smutex_lock(&printfMutex);
     printf("Handling SetShippingCostReq: new_cost - %f \n",req->new_cost);
+    smutex_unlock(&printfMutex);
     req->store->setShippingCost(req->new_cost);
     return;
 }
@@ -161,8 +169,9 @@ void
 set_store_discount_handler(void *args)
 {
     SetStoreDiscountReq* req = reinterpret_cast<SetStoreDiscountReq*> (args);
-//  cout<<"Handling SetStoreDiscountReq: new_discount - "<<req->new_discount << endl;
+    smutex_lock(&printfMutex);
     printf("Handling SetStoreDiscountReq: new_discount - %f \n", req->new_discount);
+    smutex_unlock(&printfMutex);
     req->store->setStoreDiscount(req->new_discount);
     return;
 }
@@ -184,8 +193,9 @@ void
 buy_item_handler(void *args)
 {
     BuyItemReq* req = reinterpret_cast<BuyItemReq*> (args);
-   // cout<<"Handling BuyItemReq: item_id - "<<req->item_id << ", budget - " <<req->budget << endl;
+    smutex_lock(&printfMutex);
     printf("Handling BuyItemReq: item_id - %d, budget - %f \n", req->item_id, req->budget);
+    smutex_unlock(&printfMutex);
     req->store->buyItem(req->item_id, req->budget);
     return;
 }
@@ -207,12 +217,15 @@ void
 buy_many_items_handler(void *args)
 {
     BuyManyItemsReq* req = reinterpret_cast<BuyManyItemsReq*> (args);
-    //cout<<"Handling BuyManyItemsReq:";
+    smutex_lock(&printfMutex);
+
     printf("Handling BuyManyItemReq: item_ids - ");
     for (int i =0; i < (int) req->item_ids.size();i++){
 	    printf(" %d", req->item_ids[i]);
     }
-    cout<<", budget - " <<req->budget << endl;
+   // printf("budget - \n", req->budget);
+    printf(" \n");
+    smutex_unlock(&printfMutex);
     req->store->buyManyItems(&req->item_ids, req->budget);
     return;
 }
@@ -230,8 +243,10 @@ buy_many_items_handler(void *args)
  */
 void 
 stop_handler(void* args)
-{
+{   
+    smutex_lock(&printfMutex);
     printf("Handling StopHandlerReq: Quitting \n");
+    smutex_unlock(&printfMutex);
     sthread_exit();
 }
 

@@ -1,6 +1,6 @@
-Name: 
-net ID: 
-NYU ID(N#): 
+Name: Minli Song
+net ID: ms12231
+NYU ID(N#): N19264696
 
 Collaborators (who you talked to about the lab, what you talked about):
 
@@ -9,7 +9,6 @@ Source material that you consulted:
 
 
 Other acknowledgments:
-
 
 -------------------------------------------------------------------------------
 
@@ -36,3 +35,11 @@ Anything else you'd like us to know:
 
 
 Extra credit exercise(s) (describe what you coded):
+Exercise 8. 9
+For exercise 8, I suppose we need to wait if we cannot brought in case 
+1. the item is not valid yet // this case could be envoke or cancel from buyManyItems method
+2. the item quantity is not enough yet
+3. the budget is not enough yet
+
+For exercise 9 
+create a const to keep discount rate and shipping cost in each order
