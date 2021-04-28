@@ -1,0 +1,29 @@
+Name:Minli Song
+net ID:ms12231
+NYU ID(N#):N19264696
+
+Collaborators (who you talked to about the lab, what you talked about):
+No
+
+Source material that you consulted:
+
+No
+Other acknowledgments:
+
+No
+
+Output for exercise 6:
+mnt:
+-rw-r--r-- 1 vagrant vagrant     6 Apr 26 01:24 hello
+drwxr-xr-x 5 vagrant vagrant  4096 Apr 26 01:22 ..
+drwxrwxrwx 2 vagrant vagrant  4096 Apr 26 01:28 .
+
+0
+
+How long did this lab take you?
+30 hours
+
+Anything else you'd like us to know:
+I feel much more claer about how file system works and how to build a file system!
+
+Extra credit exercise(s) (describe what you coded):
