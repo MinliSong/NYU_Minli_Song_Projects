@@ -1,3 +1,5 @@
 # NYU_Minli_Song_Projects
 
-My Projects
+Hi, 
+These are my Projects during study in NYU
+
